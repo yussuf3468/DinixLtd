@@ -61,6 +61,7 @@ export default function ClientList({ onSelectClient }: ClientListProps) {
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [showAddModal, setShowAddModal] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
