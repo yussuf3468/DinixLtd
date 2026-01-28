@@ -39,7 +39,7 @@ export default function Auth() {
             Dinix
           </h1>
           <p className="text-center text-gray-600 mb-8">
-            Professional Client Management System
+            Dinix General Trading
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">

@@ -237,6 +237,8 @@ export default function ClientList({ onSelectClient }: ClientListProps) {
 
   const handleAddClient = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     const form = e.currentTarget;
     const formData = new FormData(form);
 
@@ -354,6 +356,8 @@ export default function ClientList({ onSelectClient }: ClientListProps) {
     } catch (error) {
       console.error("Unexpected error:", error);
       toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -473,7 +477,7 @@ export default function ClientList({ onSelectClient }: ClientListProps) {
               </div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
                 <Users className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-emerald-500" />
-                Client Management
+                Dinix General Trading
               </h1>
             </div>
             <p className="text-xs sm:text-sm text-gray-600 ml-10 sm:ml-13">
@@ -956,9 +960,10 @@ export default function ClientList({ onSelectClient }: ClientListProps) {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-black hover:shadow-2xl hover:shadow-emerald-500/50 transition-all duration-200 active:scale-95"
+                  disabled={submitting}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-black hover:shadow-2xl hover:shadow-emerald-500/50 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  ✓ Add Client
+                  {submitting ? "Adding..." : "✓ Add Client"}
                 </button>
               </div>
             </form>

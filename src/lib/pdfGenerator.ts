@@ -1,4 +1,4 @@
-// PDF Report Generation Utilities for Client Management System
+// PDF Report Generation Utilities for Dinix General Trading
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { formatCurrency } from "./currency";

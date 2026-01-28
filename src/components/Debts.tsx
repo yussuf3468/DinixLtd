@@ -61,6 +61,7 @@ export default function Debts() {
   const [addMoreAmount, setAddMoreAmount] = useState("");
   const [addMoreReason, setAddMoreReason] = useState("");
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const [newDebt, setNewDebt] = useState({
     amount: "",
@@ -84,7 +85,7 @@ export default function Debts() {
       const { data, error } = await supabase
         .from("client_debts")
         .select(
-          "id, debtor_name, debtor_phone, amount, amount_paid, currency, balance, description, debt_date, due_date, paid_date, status, priority, created_at"
+          "id, debtor_name, debtor_phone, amount, amount_paid, currency, balance, description, debt_date, due_date, paid_date, status, priority, created_at",
         )
         .order("due_date", { ascending: true });
 
@@ -148,7 +149,7 @@ export default function Debts() {
 
     if (viewMode === "active") {
       filtered = filtered.filter(
-        (d) => d.status !== "paid" && d.status !== "cancelled"
+        (d) => d.status !== "paid" && d.status !== "cancelled",
       );
     } else {
       filtered = filtered.filter((d) => d.status === "paid");
@@ -164,7 +165,7 @@ export default function Debts() {
         (d) =>
           (d.client_name || "").toLowerCase().includes(term) ||
           (d.client_code || "").toLowerCase().includes(term) ||
-          (d.description || "").toLowerCase().includes(term)
+          (d.description || "").toLowerCase().includes(term),
       );
     }
 
@@ -252,6 +253,8 @@ export default function Debts() {
 
   async function handleAddDebt(e: React.FormEvent) {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     try {
       const {
         data: { user },
@@ -291,6 +294,8 @@ export default function Debts() {
     } catch (error: any) {
       console.error("Unexpected error:", error);
       toast.error("An unexpected error occurred: " + error.message);
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -369,7 +374,7 @@ export default function Debts() {
       const today = new Date().toLocaleDateString();
       const additionNote = `\n[${today}] Added ${formatCurrency(
         additionalAmount,
-        selectedDebt.currency
+        selectedDebt.currency,
       )}${addMoreReason ? `: ${addMoreReason}` : ""}`;
       const updatedDescription = selectedDebt.description
         ? selectedDebt.description + additionNote
@@ -388,8 +393,8 @@ export default function Debts() {
       toast.success(
         `Added ${formatCurrency(
           additionalAmount,
-          selectedDebt.currency
-        )} to debt!`
+          selectedDebt.currency,
+        )} to debt!`,
       );
       setShowAddMoreDebt(false);
       setAddMoreAmount("");
@@ -416,8 +421,12 @@ export default function Debts() {
         <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border-2 border-gray-200 hover:shadow-3xl hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-gray-600 mb-2">Overdue</p>
-              <p className="text-2xl font-black text-red-600">{stats.overdue}</p>
+              <p className="text-sm font-semibold text-gray-600 mb-2">
+                Overdue
+              </p>
+              <p className="text-2xl font-black text-red-600">
+                {stats.overdue}
+              </p>
             </div>
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-xl shadow-red-500/30">
               <AlertCircle className="w-7 h-7 text-white" />
@@ -428,8 +437,12 @@ export default function Debts() {
         <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border-2 border-gray-200 hover:shadow-3xl hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-gray-600 mb-2">Pending</p>
-              <p className="text-2xl font-black text-amber-600">{stats.pending}</p>
+              <p className="text-sm font-semibold text-gray-600 mb-2">
+                Pending
+              </p>
+              <p className="text-2xl font-black text-amber-600">
+                {stats.pending}
+              </p>
             </div>
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-xl shadow-amber-500/30">
               <Calendar className="w-7 h-7 text-white" />
@@ -441,7 +454,9 @@ export default function Debts() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-gray-600 mb-2">Paid</p>
-              <p className="text-2xl font-black text-emerald-600">{stats.paid}</p>
+              <p className="text-2xl font-black text-emerald-600">
+                {stats.paid}
+              </p>
             </div>
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-xl shadow-emerald-500/30">
               <DollarSign className="w-7 h-7 text-white" />
@@ -452,7 +467,9 @@ export default function Debts() {
         <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border-2 border-gray-200 hover:shadow-3xl hover:scale-105 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-gray-600 mb-2">Total Balance</p>
+              <p className="text-sm font-semibold text-gray-600 mb-2">
+                Total Balance
+              </p>
               <p className="text-2xl font-black text-blue-600">
                 {formatCurrency(stats.totalBalance, "KES")}
               </p>
@@ -570,13 +587,15 @@ export default function Debts() {
                       <p className="text-sm text-gray-600 mt-1">
                         {debt.client_code || "—"}
                       </p>
-                      <p className="text-sm text-gray-500 mt-1">{debt.phone || "N/A"}</p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {debt.phone || "N/A"}
+                      </p>
                     </div>
 
                     <div className="text-right">
                       <span
                         className={`inline-block px-3 py-1 text-xs rounded-full ${getStatusColor(
-                          debt.status
+                          debt.status,
                         )}`}
                       >
                         {debt.status.toUpperCase()}
@@ -604,8 +623,8 @@ export default function Debts() {
                           daysUntilDue < 0
                             ? "text-red-600"
                             : daysUntilDue <= 7
-                            ? "text-amber-600"
-                            : "text-gray-600"
+                              ? "text-amber-600"
+                              : "text-gray-600"
                         }`}
                       >
                         {viewMode === "history"
@@ -613,16 +632,16 @@ export default function Debts() {
                             ? `Paid on ${new Date(debt.paid_date).toLocaleDateString()}`
                             : "—"
                           : daysUntilDue < 0
-                          ? `${Math.abs(daysUntilDue)} days overdue`
-                          : daysUntilDue === 0
-                          ? "Due today"
-                          : `${daysUntilDue} days left`}
+                            ? `${Math.abs(daysUntilDue)} days overdue`
+                            : daysUntilDue === 0
+                              ? "Due today"
+                              : `${daysUntilDue} days left`}
                       </p>
                       <p className="text-sm mt-2 text-gray-500">
                         Priority{" "}
                         <span
                           className={`inline-block px-2 py-0.5 text-xs rounded-full ${getPriorityColor(
-                            debt.priority
+                            debt.priority,
                           )}`}
                         >
                           {debt.priority}
@@ -672,7 +691,9 @@ export default function Debts() {
 
                   <div className="mt-4 text-sm text-gray-700 max-h-16 overflow-hidden">
                     {debt.description ? (
-                      <p className="whitespace-pre-wrap line-clamp-3">{debt.description}</p>
+                      <p className="whitespace-pre-wrap line-clamp-3">
+                        {debt.description}
+                      </p>
                     ) : (
                       <p className="text-gray-400 italic">No description</p>
                     )}
@@ -807,9 +828,10 @@ export default function Debts() {
               </button>
               <button
                 type="submit"
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 text-white rounded-xl hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 font-bold"
+                disabled={submitting}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 text-white rounded-xl hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Add Debt
+                {submitting ? "Adding..." : "Add Debt"}
               </button>
             </div>
           </form>
@@ -839,7 +861,7 @@ export default function Debts() {
                 </div>
                 <span
                   className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                    selectedDebt.status
+                    selectedDebt.status,
                   )}`}
                 >
                   {selectedDebt.status}
@@ -856,7 +878,10 @@ export default function Debts() {
                 <div>
                   <p className="text-sm text-gray-600">Balance Due</p>
                   <p className="text-lg font-semibold text-emerald-600">
-                    {formatCurrency(selectedDebt.balance, selectedDebt.currency)}
+                    {formatCurrency(
+                      selectedDebt.balance,
+                      selectedDebt.currency,
+                    )}
                   </p>
                 </div>
               </div>
@@ -875,17 +900,17 @@ export default function Debts() {
                       getDaysUntilDue(selectedDebt.due_date) < 0
                         ? "text-red-600"
                         : getDaysUntilDue(selectedDebt.due_date) <= 7
-                        ? "text-amber-600"
-                        : "text-emerald-600"
+                          ? "text-amber-600"
+                          : "text-emerald-600"
                     }`}
                   >
                     {getDaysUntilDue(selectedDebt.due_date) < 0
                       ? `${Math.abs(
-                          getDaysUntilDue(selectedDebt.due_date)
+                          getDaysUntilDue(selectedDebt.due_date),
                         )} days overdue`
                       : getDaysUntilDue(selectedDebt.due_date) === 0
-                      ? "Due today"
-                      : `${getDaysUntilDue(selectedDebt.due_date)} days left`}
+                        ? "Due today"
+                        : `${getDaysUntilDue(selectedDebt.due_date)} days left`}
                   </p>
                 </div>
               </div>
@@ -921,10 +946,19 @@ export default function Debts() {
                         </thead>
                         <tbody>
                           {history.map((h, idx) => (
-                            <tr key={idx} className="even:bg-white odd:bg-gray-50">
-                              <td className="px-3 py-2 text-gray-800">{h.date || "—"}</td>
-                              <td className="px-3 py-2 text-gray-800">{h.amount || "—"}</td>
-                              <td className="px-3 py-2 text-gray-700">{h.note || "—"}</td>
+                            <tr
+                              key={idx}
+                              className="even:bg-white odd:bg-gray-50"
+                            >
+                              <td className="px-3 py-2 text-gray-800">
+                                {h.date || "—"}
+                              </td>
+                              <td className="px-3 py-2 text-gray-800">
+                                {h.amount || "—"}
+                              </td>
+                              <td className="px-3 py-2 text-gray-700">
+                                {h.note || "—"}
+                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -974,7 +1008,8 @@ export default function Debts() {
                 </p>
                 {selectedDebt.paid_date && (
                   <p className="text-center text-sm text-gray-600 mt-2">
-                    Paid on: {new Date(selectedDebt.paid_date).toLocaleDateString()}
+                    Paid on:{" "}
+                    {new Date(selectedDebt.paid_date).toLocaleDateString()}
                   </p>
                 )}
               </div>
@@ -1011,15 +1046,25 @@ export default function Debts() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600 font-semibold">Current Debt</p>
+                    <p className="text-sm text-gray-600 font-semibold">
+                      Current Debt
+                    </p>
                     <p className="text-xl font-black text-red-600">
-                      {formatCurrency(selectedDebt.amount, selectedDebt.currency)}
+                      {formatCurrency(
+                        selectedDebt.amount,
+                        selectedDebt.currency,
+                      )}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 font-semibold">Balance</p>
+                    <p className="text-sm text-gray-600 font-semibold">
+                      Balance
+                    </p>
                     <p className="text-xl font-black text-amber-600">
-                      {formatCurrency(selectedDebt.balance, selectedDebt.currency)}
+                      {formatCurrency(
+                        selectedDebt.balance,
+                        selectedDebt.currency,
+                      )}
                     </p>
                   </div>
                 </div>
@@ -1063,9 +1108,14 @@ export default function Debts() {
 
                 {addMoreAmount && parseFloat(addMoreAmount) > 0 && (
                   <div className="bg-white rounded-xl p-4 border-2 border-orange-200">
-                    <p className="text-sm text-gray-600 font-semibold mb-1">New Total Debt:</p>
+                    <p className="text-sm text-gray-600 font-semibold mb-1">
+                      New Total Debt:
+                    </p>
                     <p className="text-2xl font-black text-red-600">
-                      {formatCurrency(selectedDebt.amount + parseFloat(addMoreAmount), selectedDebt.currency)}
+                      {formatCurrency(
+                        selectedDebt.amount + parseFloat(addMoreAmount),
+                        selectedDebt.currency,
+                      )}
                     </p>
                   </div>
                 )}

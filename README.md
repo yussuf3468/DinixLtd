@@ -1,16 +1,16 @@
-# 🌟 Dinix - Premium Client Management System
+# 🌟 Dinix - Professional Business Management System
 
-> **Professional client management with dual-currency support, ultra UX/UI, and mobile-first design**
+> **Professional business management with dual-currency support, ultra UX/UI, and mobile-first design**
 >
 > **Owner: Abdiwali Aden**
 >
 > **Company: Dinix General Trading**
 
-A beautiful, enterprise-grade Client Management System designed for modern businesses. Track clients and transactions in **dual currencies** (KES & USD) with an exceptional user interface built with React, TypeScript, Tailwind CSS, and Supabase.
+A beautiful, enterprise-grade business management system designed for modern businesses. Track clients and transactions in **dual currencies** (KES & USD) with an exceptional user interface built with React, TypeScript, Tailwind CSS, and Supabase.
 
 ## ✨ Premium Features
 
-- 👥 **Client Management** - Auto-generated client codes (CLT-0001), smart search, status tracking
+- 👥 **Client Tracking** - Auto-generated client codes (CLT-0001), smart search, status tracking
 - 💰 **Dual Currency** - Full KES (Kenya Shillings) and USD support with separate transaction tables
 - 📊 **Advanced Analytics** - Top clients ranking, monthly trends, real-time statistics
 - 📄 **PDF Reports** - Professional branded reports per client or all clients summary

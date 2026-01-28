@@ -2,7 +2,7 @@
   "name": "client-management-system",
   "private": true,
   "version": "2.0.0",
-  "description": "Professional Client Management System with dual-currency support",
+  "description": "Dinix General Trading - Professional business management with dual-currency support",
   "type": "module",
   "scripts": {
     "dev": "vite",

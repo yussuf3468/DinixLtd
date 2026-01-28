@@ -55,6 +55,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
   const [transactionsKES, setTransactionsKES] = useState<Transaction[]>([]);
   const [transactionsUSD, setTransactionsUSD] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<"kes" | "usd">("kes");
   const [showAddTransaction, setShowAddTransaction] = useState(false);
   const [showEditTransaction, setShowEditTransaction] = useState(false);
@@ -101,29 +102,29 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
     (transactions: Transaction[], setSummary: Function) => {
       const receivable = transactions.reduce(
         (sum, t) => sum + (t.debit || 0),
-        0
+        0,
       );
       const paid = transactions.reduce((sum, t) => sum + (t.credit || 0), 0);
       const balance = paid - receivable;
 
       setSummary({ receivable, paid, balance });
     },
-    []
+    [],
   );
 
   const currentTransactions = useMemo(
     () => (activeTab === "kes" ? transactionsKES : transactionsUSD),
-    [activeTab, transactionsKES, transactionsUSD]
+    [activeTab, transactionsKES, transactionsUSD],
   );
 
   const currentSummary = useMemo(
     () => (activeTab === "kes" ? summaryKES : summaryUSD),
-    [activeTab, summaryKES, summaryUSD]
+    [activeTab, summaryKES, summaryUSD],
   );
 
   const currencySymbol = useMemo(
     () => (activeTab === "kes" ? "KES" : "USD"),
-    [activeTab]
+    [activeTab],
   );
 
   const loadClientData = async () => {
@@ -137,7 +138,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
         supabase
           .from("clients")
           .select(
-            "id, client_name, client_code, email, phone, business_name, address, status, notes, created_at, last_transaction_date"
+            "id, client_name, client_code, email, phone, business_name, address, status, notes, created_at, last_transaction_date",
           )
           .eq("id", clientId)
           .eq("user_id", user.id)
@@ -145,7 +146,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
         supabase
           .from("client_transactions_kes")
           .select(
-            "id, transaction_date, description, credit, debit, reference_number, payment_method, notes, created_at"
+            "id, transaction_date, description, credit, debit, reference_number, payment_method, notes, created_at",
           )
           .eq("client_id", clientId)
           .eq("user_id", user.id)
@@ -154,7 +155,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
         supabase
           .from("client_transactions_usd")
           .select(
-            "id, transaction_date, description, credit, debit, reference_number, payment_method, notes, created_at"
+            "id, transaction_date, description, credit, debit, reference_number, payment_method, notes, created_at",
           )
           .eq("client_id", clientId)
           .eq("user_id", user.id)
@@ -211,7 +212,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
     if (pinAction.type === "delete") {
       await executeDelete(
         pinAction.data.transactionId,
-        pinAction.data.currency
+        pinAction.data.currency,
       );
     } else if (pinAction.type === "edit") {
       setEditingTransaction(pinAction.data.transaction);
@@ -251,7 +252,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
 
   const executeDelete = async (
     transactionId: string,
-    currency: "kes" | "usd"
+    currency: "kes" | "usd",
   ) => {
     try {
       const table =
@@ -272,13 +273,13 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
       // Remove transaction from state without full reload
       if (currency === "kes") {
         const updatedTransactions = transactionsKES.filter(
-          (t) => t.id !== transactionId
+          (t) => t.id !== transactionId,
         );
         setTransactionsKES(updatedTransactions);
         calculateSummary(updatedTransactions, setSummaryKES);
       } else {
         const updatedTransactions = transactionsUSD.filter(
-          (t) => t.id !== transactionId
+          (t) => t.id !== transactionId,
         );
         setTransactionsUSD(updatedTransactions);
         calculateSummary(updatedTransactions, setSummaryUSD);
@@ -340,6 +341,8 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
 
   const handleAddTransaction = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     const formData = new FormData(e.currentTarget);
     const currency = formData.get("currency") as string;
     const transactionType = formData.get("transaction_type") as string;
@@ -397,6 +400,8 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
     } catch (error) {
       console.error("Unexpected error:", error);
       toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -510,7 +515,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
       toast.error(
         `Failed to generate PDF report: ${
           error instanceof Error ? error.message : "Unknown error"
-        }. Please try again.`
+        }. Please try again.`,
       );
     }
   };
@@ -701,7 +706,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
               <p className="text-3xl font-black tracking-tight drop-shadow-lg">
                 {formatCurrency(
                   Math.abs(currentSummary.balance),
-                  currencySymbol
+                  currencySymbol,
                 )}
               </p>
             </div>
@@ -848,7 +853,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                   const runningBalance = remainingTransactions.reduce(
                     (sum, t) =>
                       sum + Number(t.credit || 0) - Number(t.debit || 0),
-                    0
+                    0,
                   );
 
                   return (
@@ -863,7 +868,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                           </p>
                           <p className="text-xs text-gray-600 font-medium">
                             {new Date(
-                              transaction.transaction_date
+                              transaction.transaction_date,
                             ).toLocaleDateString("en-GB", {
                               day: "2-digit",
                               month: "short",
@@ -909,7 +914,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                               +
                               {formatCurrency(
                                 transaction.credit,
-                                currencySymbol
+                                currencySymbol,
                               )}
                             </p>
                           ) : (
@@ -926,7 +931,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                               -
                               {formatCurrency(
                                 transaction.debit,
-                                currencySymbol
+                                currencySymbol,
                               )}
                             </p>
                           ) : (
@@ -1089,7 +1094,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                       const runningBalance = remainingTransactions.reduce(
                         (sum, t) =>
                           sum + Number(t.credit || 0) - Number(t.debit || 0),
-                        0
+                        0,
                       );
 
                       return (
@@ -1100,7 +1105,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                           <td className="px-4 py-3 whitespace-nowrap">
                             <div className="text-sm font-semibold text-gray-900">
                               {new Date(
-                                transaction.transaction_date
+                                transaction.transaction_date,
                               ).toLocaleDateString("en-GB", {
                                 day: "2-digit",
                                 month: "short",
@@ -1119,7 +1124,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                                 +
                                 {formatCurrency(
                                   transaction.credit,
-                                  currencySymbol
+                                  currencySymbol,
                                 )}
                               </span>
                             ) : (
@@ -1132,7 +1137,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                                 -
                                 {formatCurrency(
                                   transaction.debit,
-                                  currencySymbol
+                                  currencySymbol,
                                 )}
                               </span>
                             ) : (
@@ -1317,9 +1322,10 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-6 py-3 sm:py-3.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-white rounded-xl sm:rounded-2xl font-black hover:shadow-2xl hover:shadow-emerald-500/50 transition-all duration-300 text-sm sm:text-base active:scale-95"
+                    disabled={submitting}
+                    className="flex-1 px-6 py-3 sm:py-3.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-white rounded-xl sm:rounded-2xl font-black hover:shadow-2xl hover:shadow-emerald-500/50 transition-all duration-300 text-sm sm:text-base active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    ✓ Add Transaction
+                    {submitting ? "Adding..." : "✓ Add Transaction"}
                   </button>
                 </div>
               </form>

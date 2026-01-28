@@ -62,7 +62,7 @@ export default function Layout({
                   Dinix
                 </h1>
                 <p className="text-xs text-gray-500 -mt-0.5">
-                  Client Management System
+                  Dinix General Trading
                 </p>
               </div>
             </div>
@@ -110,7 +110,9 @@ export default function Layout({
               <h1 className="text-base font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                 Dinix
               </h1>
-              <p className="text-xs text-gray-600 -mt-0.5">Client Management</p>
+              <p className="text-xs text-gray-600 -mt-0.5">
+                Dinix General Trading
+              </p>
             </div>
           </div>
           <button
