@@ -25,28 +25,23 @@ function generateIcon(size) {
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = size * 0.01;
 
-  // Draw large "E" in white
+  // Draw large "D" in white for Dinix
   ctx.fillStyle = 'white';
   ctx.font = `bold ${size * 0.5}px Arial`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
   ctx.shadowBlur = size * 0.03;
-  ctx.fillText('E', size / 2, size * 0.45);
+  ctx.fillText('D', size / 2, size * 0.5);
 
-  // Reset shadow
+  // Reset shadow for any future drawing
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
-
-  // Draw "CMS" text below
-  ctx.font = `${size * 0.12}px Arial`;
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-  ctx.fillText('CMS', size / 2, size * 0.75);
 
   return canvas;
 }
 
-console.log('🎨 Generating Ezary CMS PWA Icons...\n');
+console.log('🎨 Generating Dinix PWA Icons...\n');
 
 icons.forEach(({ size, name }) => {
   const canvas = generateIcon(size);
@@ -57,5 +52,5 @@ icons.forEach(({ size, name }) => {
   console.log(`✅ Created ${name} (${size}x${size})`);
 });
 
-console.log('\n🎉 All icons generated successfully!');
+console.log('\n🎉 All Dinix icons generated successfully!');
 console.log('📁 Icons saved to: ./public/\n');
