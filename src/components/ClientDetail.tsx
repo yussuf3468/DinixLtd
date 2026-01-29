@@ -560,12 +560,12 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
           </span>
         </button>
 
-        {/* Client Header - Ultra Premium */}
-        <div className="bg-white backdrop-blur-xl rounded-3xl border-2 border-gray-200 shadow-2xl shadow-gray-200/50 hover:shadow-3xl hover:shadow-gray-300/50 p-6 sm:p-8 mb-8 transition-all duration-500">
-          <div className="flex flex-col sm:flex-row items-start justify-between gap-6">
+        {/* Client Header - Compact */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-md hover:shadow-lg p-4 sm:p-5 mb-5 transition-all duration-300">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
             <div className="flex-1">
-              <div className="flex items-center gap-4 mb-3">
-                <h1 className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent tracking-tight">
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
                   {client.client_name}
                 </h1>
                 <button
@@ -581,20 +581,20 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                 >
                   <Edit2 className="w-5 h-5 text-gray-500 group-hover:text-emerald-600" />
                 </button>
-                <span className="px-4 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold rounded-full shadow-lg shadow-emerald-500/30 border border-emerald-400">
+                <span className="px-3 py-1 bg-emerald-500 text-white text-[0.7rem] font-bold rounded-full shadow-sm border border-emerald-500">
                   {client.status.toUpperCase()}
                 </span>
               </div>
-              <div className="flex items-center gap-2.5 bg-gray-50 px-4 py-2 rounded-lg border border-gray-200 inline-flex">
+              <div className="inline-flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 mt-1">
                 <FileText className="w-4 h-4 text-emerald-600" />
-                <p className="text-gray-700 font-mono text-sm font-bold tracking-wide">
+                <p className="text-gray-700 font-mono text-xs font-semibold tracking-wide">
                   {client.client_code}
                 </p>
               </div>
             </div>
             <button
               onClick={generatePDFReport}
-              className="group flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-2xl hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-500 font-bold text-sm active:scale-95 hover:scale-105 border-2 border-blue-500"
+              className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-xl hover:shadow-md hover:shadow-blue-500/40 transition-all duration-300 font-semibold text-xs sm:text-sm active:scale-95 border border-blue-500 mt-3 sm:mt-0"
             >
               <Download className="w-5 h-5 transition-transform group-hover:translate-y-0.5" />
               <span className="tracking-wide">Download Statement</span>
@@ -603,18 +603,18 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
         </div>
 
         {/* Client Info Grid - Compact */}
-        <div className="mb-6">
+        <div className="mb-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {client.phone && (
-              <div className="flex items-center gap-4 p-5 rounded-2xl bg-white border-2 border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-purple-300">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 via-pink-500 to-pink-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-purple-500/30">
-                  <Phone className="w-6 h-6 text-white" />
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:border-purple-300">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 via-pink-500 to-pink-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-purple-500/30">
+                  <Phone className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-0.5">
                     Phone
                   </p>
-                  <p className="text-sm font-bold text-gray-900 truncate">
+                  <p className="text-sm font-semibold text-gray-900 truncate">
                     {client.phone}
                   </p>
                 </div>
@@ -627,10 +627,10 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
         <div className="flex gap-4 mb-8">
           <button
             onClick={() => setActiveTab("kes")}
-            className={`flex-1 px-8 py-5 rounded-2xl font-black transition-all duration-500 text-sm sm:text-base shadow-lg border-2 ${
+            className={`flex-1 px-6 py-3 rounded-2xl font-bold transition-all duration-300 text-sm sm:text-base shadow-sm border ${
               activeTab === "kes"
-                ? "bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 text-white shadow-emerald-500/40 border-emerald-400"
-                : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 hover:border-emerald-300 hover:shadow-xl"
+                ? "bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 text-white border-emerald-400 shadow-md"
+                : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 hover:border-emerald-300 hover:shadow-sm"
             }`}
           >
             <span className="hidden sm:inline">🇰🇪 Kenyan Shillings</span>
@@ -638,10 +638,10 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
           </button>
           <button
             onClick={() => setActiveTab("usd")}
-            className={`flex-1 px-8 py-5 rounded-2xl font-black transition-all duration-500 text-sm sm:text-base shadow-lg border-2 ${
+            className={`flex-1 px-6 py-3 rounded-2xl font-bold transition-all duration-300 text-sm sm:text-base shadow-sm border ${
               activeTab === "usd"
-                ? "bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-600 text-white shadow-blue-500/40 border-blue-400"
-                : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 hover:border-blue-300 hover:shadow-xl"
+                ? "bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-600 text-white border-blue-400 shadow-md"
+                : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300 hover:border-blue-300 hover:shadow-sm"
             }`}
           >
             <span className="hidden sm:inline">🇺🇸 US Dollars</span>
@@ -652,71 +652,91 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
         {/* Financial Summary */}
         <div className="mb-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* Total OUT Card */}
-            <div className="bg-gradient-to-br from-red-500 via-red-600 to-rose-700 rounded-2xl p-6 text-white shadow-2xl shadow-red-500/30 hover:shadow-3xl hover:shadow-red-500/40 transition-all duration-500 hover:scale-105 border-2 border-red-400/50">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs bg-white/30 px-3 py-1.5 rounded-full font-black uppercase tracking-wide backdrop-blur-sm border border-white/40">
-                  RECEIVABLES
-                </span>
-                <TrendingDown className="w-6 h-6 drop-shadow-lg" />
-              </div>
-              <p className="text-white/90 text-sm mb-2 font-semibold">
-                Total Receivables
-              </p>
-              <p className="text-3xl font-black tracking-tight drop-shadow-lg">
-                {formatCurrency(currentSummary.receivable, currencySymbol)}
-              </p>
-            </div>
-
-            {/* Total IN Card */}
-            <div className="bg-gradient-to-br from-emerald-500 via-teal-600 to-green-700 rounded-2xl p-6 text-white shadow-2xl shadow-emerald-500/30 hover:shadow-3xl hover:shadow-emerald-500/40 transition-all duration-500 hover:scale-105 border-2 border-emerald-400/50">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs bg-white/30 px-3 py-1.5 rounded-full font-black uppercase tracking-wide backdrop-blur-sm border border-white/40">
-                  RECEIVED
-                </span>
-                <TrendingUp className="w-6 h-6 drop-shadow-lg" />
-              </div>
-              <p className="text-white/90 text-sm mb-2 font-semibold">
-                Payments Received
-              </p>
-              <p className="text-3xl font-black tracking-tight drop-shadow-lg">
-                {formatCurrency(currentSummary.paid, currencySymbol)}
-              </p>
-            </div>
-
-            {/* Balance Card */}
+            {/* Balance Card (Outstanding/Credit) FIRST */}
             <div
-              className={`rounded-2xl p-6 text-white shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 border-2 ${
+              className={`rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-300 border ${
                 currentSummary.balance >= 0
-                  ? "bg-gradient-to-br from-blue-500 via-indigo-600 to-blue-700 shadow-blue-500/30 hover:shadow-blue-500/40 border-blue-400/50"
-                  : "bg-gradient-to-br from-orange-500 via-amber-600 to-orange-700 shadow-orange-500/30 hover:shadow-orange-500/40 border-orange-400/50"
+                  ? "bg-blue-50 border-blue-100 text-blue-800"
+                  : "bg-orange-50 border-orange-100 text-orange-800"
               }`}
             >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs bg-white/30 px-3 py-1.5 rounded-full font-black uppercase tracking-wide backdrop-blur-sm border border-white/40">
+              <div className="flex items-center justify-between mb-2">
+                <span
+                  className={`text-[0.68rem] sm:text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wide border ${
+                    currentSummary.balance >= 0
+                      ? "bg-blue-100 text-blue-700 border-blue-200"
+                      : "bg-orange-100 text-orange-700 border-orange-200"
+                  }`}
+                >
                   {currentSummary.balance >= 0 ? "CREDIT" : "OUTSTANDING"}
                 </span>
-                <DollarSign className="w-6 h-6 drop-shadow-lg" />
+                <DollarSign
+                  className={`w-5 h-5 ${
+                    currentSummary.balance >= 0
+                      ? "text-blue-500"
+                      : "text-orange-500"
+                  }`}
+                />
               </div>
-              <p className="text-white/90 text-sm mb-2 font-semibold">
+              <p className="text-xs sm:text-sm mb-1 font-semibold">
                 {currentSummary.balance >= 0
                   ? "Credit Balance"
                   : "Outstanding Balance"}
               </p>
-              <p className="text-3xl font-black tracking-tight drop-shadow-lg">
+              <p className="text-2xl sm:text-3xl font-bold tracking-tight">
                 {formatCurrency(
                   Math.abs(currentSummary.balance),
                   currencySymbol,
                 )}
               </p>
             </div>
+
+            {/* Total IN Card (middle) */}
+            <div className="bg-emerald-50 rounded-2xl p-4 sm:p-5 text-emerald-800 shadow-sm hover:shadow-md transition-all duration-300 border border-emerald-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[0.68rem] sm:text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-semibold uppercase tracking-wide border border-emerald-200">
+                  RECEIVED
+                </span>
+                <TrendingUp className="w-5 h-5 text-emerald-500" />
+              </div>
+              <p className="text-xs sm:text-sm text-emerald-700 mb-1 font-semibold">
+                Payments Received
+              </p>
+              <p className="text-2xl sm:text-3xl font-bold tracking-tight">
+                {formatCurrency(currentSummary.paid, currencySymbol)}
+              </p>
+            </div>
+
+            {/* Total OUT Card (Receivables) LAST */}
+            <div className="bg-red-50 rounded-2xl p-4 sm:p-5 text-red-800 shadow-sm hover:shadow-md transition-all duration-300 border border-red-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[0.68rem] sm:text-xs bg-red-100 text-red-700 px-3 py-1 rounded-full font-semibold uppercase tracking-wide border border-red-200">
+                  RECEIVABLES
+                </span>
+                <TrendingDown className="w-5 h-5 text-red-500" />
+              </div>
+              <p className="text-xs sm:text-sm text-red-700 mb-1 font-semibold">
+                Total Receivables
+              </p>
+              <p className="text-2xl sm:text-3xl font-bold tracking-tight">
+                {formatCurrency(currentSummary.receivable, currencySymbol)}
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Transactions Section */}
-        <div className="bg-white backdrop-blur-xl rounded-3xl border-2 border-gray-200 shadow-2xl shadow-gray-200/50 overflow-hidden transition-all duration-500 hover:shadow-3xl hover:shadow-gray-300/50">
-          <div className="p-4 sm:p-8 bg-gradient-to-r from-gray-50 via-white to-gray-50 border-b-2 border-gray-200">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="bg-white backdrop-blur-xl rounded-3xl border border-gray-200 shadow-md shadow-gray-200/60 overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-gray-300/70">
+          <div className="p-4 sm:p-6 bg-gradient-to-r from-gray-50 via-white to-gray-50 border-b border-gray-200 relative">
+            <button
+              onClick={() => setShowAddTransaction(true)}
+              className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 bg-emerald-600 text-white rounded-full active:opacity-80 absolute right-4 top-4"
+              aria-label="Add transaction"
+            >
+              <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pr-12 sm:pr-16">
               <div>
                 <h2 className="text-xl sm:text-3xl font-black text-gray-900 mb-2 tracking-tight">
                   Transaction History
@@ -726,13 +746,6 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                   {currentTransactions.length !== 1 ? "s" : ""}
                 </p>
               </div>
-              <button
-                onClick={() => setShowAddTransaction(true)}
-                className="flex items-center justify-center gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-white rounded-2xl hover:shadow-2xl hover:shadow-emerald-500/50 transition-all duration-500 font-black text-sm sm:text-base active:scale-95 hover:scale-105 border-2 border-emerald-500 w-full sm:w-auto"
-              >
-                <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span>Add Transaction</span>
-              </button>
             </div>
           </div>
 

@@ -52,12 +52,13 @@ export const generateClientPDFReport = (options: ReportOptions) => {
     doc.rect(0, 0, pageWidth, 40, "F");
 
     // Modern Header - Dinix General Trading Branding
-    doc.setFontSize(10);
+    // Make company name more prominent than the statement label
+    doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 255, 255);
     doc.text("DINIX GENERAL TRADING", 15, 14);
 
-    doc.setFontSize(24);
+    doc.setFontSize(13);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 255, 255);
     doc.text("ACCOUNT STATEMENT", 15, 24);
