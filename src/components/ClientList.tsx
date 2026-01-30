@@ -55,6 +55,7 @@ export default function ClientList({ onSelectClient }: ClientListProps) {
     new Map(),
   );
   const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortField, setSortField] = useState<SortField>("date");
@@ -74,6 +75,15 @@ export default function ClientList({ onSelectClient }: ClientListProps) {
       loadBalances();
     }
   }, [user]);
+
+  // Debounce search input to avoid heavy filtering on every keystroke
+  useEffect(() => {
+    const handle = window.setTimeout(() => {
+      setSearchTerm(searchInput.trim());
+    }, 250);
+
+    return () => window.clearTimeout(handle);
+  }, [searchInput]);
 
   const loadClients = async () => {
     if (!user) return;
@@ -181,7 +191,7 @@ export default function ClientList({ onSelectClient }: ClientListProps) {
     }
 
     // Search filter
-    if (searchTerm.trim()) {
+    if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
         (c) =>
@@ -510,13 +520,13 @@ export default function ClientList({ onSelectClient }: ClientListProps) {
               <input
                 type="text"
                 placeholder="Search clients by name, code, email, phone..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 className="w-full pl-10 sm:pl-12 pr-10 sm:pr-4 py-2.5 sm:py-3 text-sm sm:text-base bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-gray-900 placeholder-gray-500 hover:border-gray-300 font-medium"
               />
-              {searchTerm && (
+              {searchInput && (
                 <button
-                  onClick={() => setSearchTerm("")}
+                  onClick={() => setSearchInput("")}
                   className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-900 transition-colors p-1 hover:bg-gray-100 rounded-lg"
                 >
                   <X className="w-4 h-4 sm:w-5 sm:h-5" />

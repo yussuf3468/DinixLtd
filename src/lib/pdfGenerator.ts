@@ -31,7 +31,13 @@ interface ReportOptions {
   reportType: "full" | "summary" | "kes-only" | "usd-only";
 }
 
-export const generateClientPDFReport = (options: ReportOptions) => {
+// Optional handler to customize what happens with the generated PDF
+// If provided, we won't call doc.save and will instead pass back the jsPDF
+// instance and filename so the caller can download, upload, or share it.
+export const generateClientPDFReport = (
+  options: ReportOptions,
+  onDocReady?: (doc: jsPDF, fileName: string) => void,
+) => {
   try {
     const {
       client,
@@ -128,194 +134,35 @@ export const generateClientPDFReport = (options: ReportOptions) => {
 
     yPosition += 12;
 
-    // Financial Summary Section with modern 3D cards
-    if (reportType !== "kes-only" && reportType !== "usd-only") {
-      doc.setFontSize(13);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(16, 185, 129); // Emerald-600
-      doc.text("ACCOUNT SUMMARY", 15, yPosition);
-
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(100, 116, 139);
-      doc.text(
-        "Your current financial position at a glance",
-        15,
-        yPosition + 5,
-      );
-      yPosition += 12;
-
-      const boxWidth = (pageWidth - 40) / 3;
-      const boxHeight = 30;
-
-      // Total IN box - Modern Emerald Design
-      // Shadow effect
-      doc.setFillColor(209, 213, 219); // Gray-300
-      doc.roundedRect(15.5, yPosition + 0.5, boxWidth, boxHeight, 4, 4, "F");
-      // Main box
-      doc.setFillColor(236, 253, 245); // Emerald-50
-      doc.roundedRect(15, yPosition, boxWidth, boxHeight, 4, 4, "F");
-      // Border
-      doc.setDrawColor(167, 243, 208); // Emerald-300
-      doc.setLineWidth(1);
-      doc.roundedRect(15, yPosition, boxWidth, boxHeight, 4, 4, "S");
-
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(100, 116, 139);
-      doc.text("MONEY RECEIVED", 20, yPosition + 8);
-      doc.setFontSize(7);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(120, 130, 145);
-      doc.text("(Total Payments In)", 20, yPosition + 13);
-      doc.setFontSize(13);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(5, 150, 105); // Emerald-700
-      doc.text(
-        `KES ${formatCurrency(summaryKES.paid, "KES")}`,
-        20,
-        yPosition + 21,
-      );
-
-      // Total OUT box - Modern Red Design
-      // Shadow effect
-      doc.setFillColor(209, 213, 219);
-      doc.roundedRect(
-        20.5 + boxWidth,
-        yPosition + 0.5,
-        boxWidth,
-        boxHeight,
-        4,
-        4,
-        "F",
-      );
-      // Main box
-      doc.setFillColor(254, 242, 242); // Red-50
-      doc.roundedRect(20 + boxWidth, yPosition, boxWidth, boxHeight, 4, 4, "F");
-      // Border
-      doc.setDrawColor(252, 165, 165); // Red-300
-      doc.setLineWidth(1);
-      doc.roundedRect(20 + boxWidth, yPosition, boxWidth, boxHeight, 4, 4, "S");
-
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(100, 116, 139);
-      doc.text("MONEY PAID OUT", 25 + boxWidth, yPosition + 8);
-      doc.setFontSize(7);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(120, 130, 145);
-      doc.text("(Total Withdrawals)", 25 + boxWidth, yPosition + 13);
-      doc.setFontSize(13);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(220, 38, 38); // Red-700
-      doc.text(
-        `KES ${formatCurrency(summaryKES.receivable, "KES")}`,
-        25 + boxWidth,
-        yPosition + 21,
-      );
-
-      // Net Balance box - Modern Blue/Teal Design
-      // Shadow effect
-      doc.setFillColor(209, 213, 219);
-      doc.roundedRect(
-        25.5 + boxWidth * 2,
-        yPosition + 0.5,
-        boxWidth,
-        boxHeight,
-        4,
-        4,
-        "F",
-      );
-      // Main box
-      doc.setFillColor(240, 249, 255); // Blue-50
-      doc.roundedRect(
-        25 + boxWidth * 2,
-        yPosition,
-        boxWidth,
-        boxHeight,
-        4,
-        4,
-        "F",
-      );
-      // Border
-      const balanceColor =
-        summaryKES.balance >= 0 ? [103, 232, 249] : [252, 165, 165]; // Cyan-300 or Red-300
-      doc.setDrawColor(balanceColor[0], balanceColor[1], balanceColor[2]);
-      doc.setLineWidth(1);
-      doc.roundedRect(
-        25 + boxWidth * 2,
-        yPosition,
-        boxWidth,
-        boxHeight,
-        4,
-        4,
-        "S",
-      );
-
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(100, 116, 139);
-      doc.text("CURRENT BALANCE", 30 + boxWidth * 2, yPosition + 8);
-      doc.setFontSize(7);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(120, 130, 145);
-      const balanceStatusKES =
-        summaryKES.balance >= 0 ? "(Credit)" : "(Outstanding)";
-      doc.text(balanceStatusKES, 30 + boxWidth * 2, yPosition + 13);
-      doc.setFontSize(13);
-      doc.setFont("helvetica", "bold");
-      if (summaryKES.balance >= 0) {
-        doc.setTextColor(6, 182, 212); // Cyan-600
-      } else {
-        doc.setTextColor(220, 38, 38); // Red-700
-      }
-      doc.text(
-        `KES ${formatCurrency(Math.abs(summaryKES.balance), "KES")}`,
-        30 + boxWidth * 2,
-        yPosition + 21,
-      );
-
-      // USD Balance - simplified format
-      doc.setFontSize(10);
-      if (summaryUSD.balance >= 0) {
-        doc.setTextColor(6, 182, 212); // Cyan-600
-      } else {
-        doc.setTextColor(220, 38, 38); // Red-700
-      }
-      const usdSign = summaryUSD.balance >= 0 ? "" : "-";
-      doc.text(
-        `${usdSign}$${formatCurrency(
-          Math.abs(summaryUSD.balance),
-          "USD",
-        ).replace(/[^0-9.,]/g, "")}`,
-        30 + boxWidth * 2,
-        yPosition + 26,
-      );
-
-      yPosition += boxHeight + 8;
-
-      // Add explanation note
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "italic");
-      doc.setTextColor(100, 116, 139);
-      if (summaryKES.balance >= 0 && summaryUSD.balance >= 0) {
-        doc.text(
-          "✓ You have positive balances (money available)",
-          15,
-          yPosition,
-        );
-      } else if (summaryKES.balance < 0 || summaryUSD.balance < 0) {
-        doc.text("⚠ You have outstanding balances (money owed)", 15, yPosition);
-      }
-      yPosition += 10;
-    }
-
-    // KES Transactions
-    if (
+    const showKES =
       reportType === "full" ||
       reportType === "kes-only" ||
-      reportType === "summary"
-    ) {
+      reportType === "summary";
+    const showUSD = reportType === "full" || reportType === "usd-only";
+
+    const noKESTransactions = transactionsKES.length === 0;
+    const hasUSDTransactions = transactionsUSD.length > 0;
+
+    if (showKES && showUSD && noKESTransactions && hasUSDTransactions) {
+      // Special case: no KES transactions, but we have USD
+      // Show USD first, then the empty KES notice
+      renderUSDTransactionsSection();
+      renderKESTransactionsSection();
+    } else {
+      if (showKES) {
+        renderKESTransactionsSection();
+      }
+      if (showUSD) {
+        renderUSDTransactionsSection();
+      }
+    }
+
+    // Always place the account summary cards after the transaction history
+    renderAccountSummary();
+
+    function renderKESTransactionsSection() {
+      if (!showKES) return;
+
       if (yPosition > 240) {
         doc.addPage();
         yPosition = 15;
@@ -337,7 +184,6 @@ export const generateClientPDFReport = (options: ReportOptions) => {
       yPosition += 7;
 
       if (transactionsKES.length > 0) {
-        // Calculate running balance for each transaction (newest first, showing current balance at top)
         const totalBalance = transactionsKES.reduce(
           (sum, t) => sum + (t.credit || 0) - (t.debit || 0),
           0,
@@ -424,11 +270,10 @@ export const generateClientPDFReport = (options: ReportOptions) => {
           alternateRowStyles: { fillColor: [240, 253, 244] },
           margin: { top: 10, bottom: 20, left: 10, right: 10 },
           didDrawPage: (data) => {
-            // Ensure page breaks don't cut through rows
             if (data.cursor) {
               const bottomMargin = 20;
               if (data.cursor.y > pageHeight - bottomMargin) {
-                data.cursor.y = 15; // Reset to top of new page
+                data.cursor.y = 15;
               }
             }
           },
@@ -438,7 +283,6 @@ export const generateClientPDFReport = (options: ReportOptions) => {
 
         yPosition = (doc as any).lastAutoTable.finalY + 10;
 
-        // Add helpful note about the balance
         doc.setFontSize(8);
         doc.setFont("helvetica", "italic");
         doc.setTextColor(100, 116, 139);
@@ -461,8 +305,9 @@ export const generateClientPDFReport = (options: ReportOptions) => {
       }
     }
 
-    // USD Transactions
-    if (reportType === "full" || reportType === "usd-only") {
+    function renderUSDTransactionsSection() {
+      if (!showUSD) return;
+
       if (yPosition > 240) {
         doc.addPage();
         yPosition = 15;
@@ -484,7 +329,6 @@ export const generateClientPDFReport = (options: ReportOptions) => {
       yPosition += 7;
 
       if (transactionsUSD.length > 0) {
-        // Calculate running balance for each transaction (newest first, showing current balance at top)
         const totalBalance = transactionsUSD.reduce(
           (sum, t) => sum + (t.credit || 0) - (t.debit || 0),
           0,
@@ -571,11 +415,10 @@ export const generateClientPDFReport = (options: ReportOptions) => {
           alternateRowStyles: { fillColor: [239, 246, 255] }, // Blue-50
           margin: { top: 10, bottom: 20, left: 10, right: 10 },
           didDrawPage: (data) => {
-            // Ensure page breaks don't cut through rows
             if (data.cursor) {
               const bottomMargin = 20;
               if (data.cursor.y > pageHeight - bottomMargin) {
-                data.cursor.y = 15; // Reset to top of new page
+                data.cursor.y = 15;
               }
             }
           },
@@ -585,7 +428,6 @@ export const generateClientPDFReport = (options: ReportOptions) => {
 
         yPosition = (doc as any).lastAutoTable.finalY + 6;
 
-        // Add helpful note about the balance
         doc.setFontSize(7);
         doc.setFont("helvetica", "italic");
         doc.setTextColor(100, 116, 139);
@@ -602,6 +444,187 @@ export const generateClientPDFReport = (options: ReportOptions) => {
         doc.text("No transactions recorded in US Dollars", 15, yPosition + 10);
         yPosition += 20;
       }
+    }
+
+    function renderAccountSummary() {
+      if (reportType === "kes-only" || reportType === "usd-only") {
+        return;
+      }
+
+      // If there is not enough space, move summary to a fresh page
+      if (yPosition + 50 > pageHeight - 20) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(16, 185, 129); // Emerald-600
+      doc.text("ACCOUNT SUMMARY", 15, yPosition);
+
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(100, 116, 139);
+      doc.text(
+        "Your current financial position at a glance",
+        15,
+        yPosition + 5,
+      );
+      yPosition += 12;
+
+      const boxWidth = (pageWidth - 40) / 3;
+      const boxHeight = 30;
+
+      // MONEY RECEIVED (IN)
+      doc.setFillColor(209, 213, 219); // Gray-300 shadow
+      doc.roundedRect(15.5, yPosition + 0.5, boxWidth, boxHeight, 4, 4, "F");
+      doc.setFillColor(236, 253, 245); // Emerald-50 main
+      doc.roundedRect(15, yPosition, boxWidth, boxHeight, 4, 4, "F");
+      doc.setDrawColor(167, 243, 208); // Emerald-300 border
+      doc.setLineWidth(1);
+      doc.roundedRect(15, yPosition, boxWidth, boxHeight, 4, 4, "S");
+
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(100, 116, 139);
+      doc.text("MONEY RECEIVED", 20, yPosition + 8);
+      doc.setFontSize(7);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(120, 130, 145);
+      doc.text("(Total Payments In)", 20, yPosition + 13);
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(5, 150, 105); // Emerald-700
+      doc.text(
+        `KES ${formatCurrency(summaryKES.paid, "KES")}`,
+        20,
+        yPosition + 21,
+      );
+
+      // MONEY PAID OUT (OUT)
+      doc.setFillColor(209, 213, 219);
+      doc.roundedRect(
+        20.5 + boxWidth,
+        yPosition + 0.5,
+        boxWidth,
+        boxHeight,
+        4,
+        4,
+        "F",
+      );
+      doc.setFillColor(254, 242, 242); // Red-50
+      doc.roundedRect(20 + boxWidth, yPosition, boxWidth, boxHeight, 4, 4, "F");
+      doc.setDrawColor(252, 165, 165); // Red-300
+      doc.setLineWidth(1);
+      doc.roundedRect(20 + boxWidth, yPosition, boxWidth, boxHeight, 4, 4, "S");
+
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(100, 116, 139);
+      doc.text("MONEY PAID OUT", 25 + boxWidth, yPosition + 8);
+      doc.setFontSize(7);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(120, 130, 145);
+      doc.text("(Total Withdrawals)", 25 + boxWidth, yPosition + 13);
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(220, 38, 38); // Red-700
+      doc.text(
+        `KES ${formatCurrency(summaryKES.receivable, "KES")}`,
+        25 + boxWidth,
+        yPosition + 21,
+      );
+
+      // CURRENT BALANCE
+      doc.setFillColor(209, 213, 219);
+      doc.roundedRect(
+        25.5 + boxWidth * 2,
+        yPosition + 0.5,
+        boxWidth,
+        boxHeight,
+        4,
+        4,
+        "F",
+      );
+      doc.setFillColor(240, 249, 255); // Blue-50
+      doc.roundedRect(
+        25 + boxWidth * 2,
+        yPosition,
+        boxWidth,
+        boxHeight,
+        4,
+        4,
+        "F",
+      );
+      const balanceColor =
+        summaryKES.balance >= 0 ? [103, 232, 249] : [252, 165, 165];
+      doc.setDrawColor(balanceColor[0], balanceColor[1], balanceColor[2]);
+      doc.setLineWidth(1);
+      doc.roundedRect(
+        25 + boxWidth * 2,
+        yPosition,
+        boxWidth,
+        boxHeight,
+        4,
+        4,
+        "S",
+      );
+
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(100, 116, 139);
+      doc.text("CURRENT BALANCE", 30 + boxWidth * 2, yPosition + 8);
+      doc.setFontSize(7);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(120, 130, 145);
+      const balanceStatusKES =
+        summaryKES.balance >= 0 ? "(Credit)" : "(Outstanding)";
+      doc.text(balanceStatusKES, 30 + boxWidth * 2, yPosition + 13);
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "bold");
+      if (summaryKES.balance >= 0) {
+        doc.setTextColor(6, 182, 212); // Cyan-600
+      } else {
+        doc.setTextColor(220, 38, 38); // Red-700
+      }
+      doc.text(
+        `KES ${formatCurrency(Math.abs(summaryKES.balance), "KES")}`,
+        30 + boxWidth * 2,
+        yPosition + 21,
+      );
+
+      // USD balance line
+      doc.setFontSize(10);
+      if (summaryUSD.balance >= 0) {
+        doc.setTextColor(6, 182, 212); // Cyan-600
+      } else {
+        doc.setTextColor(220, 38, 38); // Red-700
+      }
+      const usdSign = summaryUSD.balance >= 0 ? "" : "-";
+      doc.text(
+        `${usdSign}$${formatCurrency(
+          Math.abs(summaryUSD.balance),
+          "USD",
+        ).replace(/[^0-9.,]/g, "")}`,
+        30 + boxWidth * 2,
+        yPosition + 26,
+      );
+
+      yPosition += boxHeight + 8;
+
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "italic");
+      doc.setTextColor(100, 116, 139);
+      if (summaryKES.balance >= 0 && summaryUSD.balance >= 0) {
+        doc.text(
+          "✓ You have positive balances (money available)",
+          15,
+          yPosition,
+        );
+      } else if (summaryKES.balance < 0 || summaryUSD.balance < 0) {
+        doc.text("⚠ You have outstanding balances (money owed)", 15, yPosition);
+      }
+      yPosition += 10;
     }
 
     // Footer on each page
@@ -649,11 +672,18 @@ export const generateClientPDFReport = (options: ReportOptions) => {
       );
     }
 
-    // Save the PDF
+    // Finalize the PDF
     const fileName = `Dinix_Statement_${client.client_code}_${
       new Date().toISOString().split("T")[0]
     }.pdf`;
-    doc.save(fileName);
+
+    // If a handler is provided, let the caller decide what to do
+    if (onDocReady) {
+      onDocReady(doc, fileName);
+    } else {
+      // Default behavior: trigger a normal download in the browser
+      doc.save(fileName);
+    }
   } catch (error) {
     console.error("PDF Generation Error:", error);
     throw new Error(
@@ -662,6 +692,99 @@ export const generateClientPDFReport = (options: ReportOptions) => {
       }`,
     );
   }
+};
+
+// Generate a combined statement for one or more clients in a single PDF
+// All KES transactions are merged into one KES table and all USD
+// transactions are merged into one USD table.
+export const generateCombinedClientsPDFReport = (
+  options: {
+    clients: {
+      client: Client;
+      transactionsKES: Transaction[];
+      transactionsUSD: Transaction[];
+    }[];
+  },
+  onDocReady?: (doc: jsPDF, fileName: string) => void,
+) => {
+  const { clients } = options;
+
+  if (!clients || clients.length === 0) {
+    throw new Error("No clients provided for combined statement");
+  }
+
+  // Combined client for header/footer
+  const allNames = clients.map((c) => c.client.client_name);
+  const allCodes = clients.map((c) => c.client.client_code);
+
+  const displayName =
+    allNames.length <= 2
+      ? allNames.join(" & ")
+      : `${allNames.slice(0, 2).join(" & ")} + ${allNames.length - 2} more`;
+
+  const combinedClient: Client = {
+    client_name: displayName,
+    client_code: allCodes.join(" + "),
+    email: null,
+    phone: null,
+    business_name: null,
+    address: null,
+  };
+
+  // Combine all transactions while preserving their original descriptions
+  const allKES: Transaction[] = [];
+  const allUSD: Transaction[] = [];
+
+  clients.forEach(({ transactionsKES, transactionsUSD }) => {
+    transactionsKES.forEach((t) => {
+      allKES.push({ ...t });
+    });
+
+    transactionsUSD.forEach((t) => {
+      allUSD.push({ ...t });
+    });
+  });
+
+  // Sort combined transactions by date
+  const combinedKES = allKES.sort(
+    (a, b) =>
+      new Date(a.transaction_date).getTime() -
+      new Date(b.transaction_date).getTime(),
+  );
+
+  const combinedUSD = allUSD.sort(
+    (a, b) =>
+      new Date(a.transaction_date).getTime() -
+      new Date(b.transaction_date).getTime(),
+  );
+
+  const calculateSummary = (txns: Transaction[]) => {
+    let paid = 0;
+    let receivable = 0;
+
+    txns.forEach((t) => {
+      paid += t.credit || 0;
+      receivable += t.debit || 0;
+    });
+
+    const balance = paid - receivable;
+    return { paid, receivable, balance };
+  };
+
+  const summaryKES = calculateSummary(combinedKES);
+  const summaryUSD = calculateSummary(combinedUSD);
+
+  return generateClientPDFReport(
+    {
+      client: combinedClient,
+      transactionsKES: combinedKES,
+      transactionsUSD: combinedUSD,
+      summaryKES,
+      summaryUSD,
+      reportType: "full",
+    },
+    onDocReady,
+  );
 };
 
 // Generate summary report for all clients

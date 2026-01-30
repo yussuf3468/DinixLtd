@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Auth from "./components/Auth";
 import Layout from "./components/Layout";
-import ClientList from "./components/ClientList";
-import ClientDetail from "./components/ClientDetail";
-import Reports from "./components/Reports";
-import Debts from "./components/Debts";
 import OfflineIndicator from "./components/OfflineIndicator";
 import InstallPrompt from "./components/InstallPrompt";
 import { offlineDB } from "./lib/offlineDB";
+
+const ClientList = lazy(() => import("./components/ClientList"));
+const ClientDetail = lazy(() => import("./components/ClientDetail"));
+const Reports = lazy(() => import("./components/Reports"));
+const Debts = lazy(() => import("./components/Debts"));
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -31,6 +32,13 @@ function AppContent() {
         });
     }
   }, []);
+
+  // Always scroll to top when navigating between pages or clients
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }
+  }, [currentPage, selectedClientId]);
 
   if (loading) {
     return (
@@ -79,7 +87,15 @@ function AppContent() {
   return (
     <>
       <Layout currentPage={currentPage} onNavigate={setCurrentPage}>
-        {renderPage()}
+        <Suspense
+          fallback={
+            <div className="min-h-[60vh] flex items-center justify-center text-gray-600 text-sm">
+              Loading...
+            </div>
+          }
+        >
+          {renderPage()}
+        </Suspense>
       </Layout>
       <OfflineIndicator />
       <InstallPrompt />

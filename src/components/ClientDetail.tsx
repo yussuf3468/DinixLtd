@@ -491,25 +491,82 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
     }
   };
 
-  const generatePDFReport = () => {
+  const generatePDFReport = async () => {
     if (!client) return;
 
     try {
-      generateClientPDFReport({
-        client: {
-          client_name: client.client_name,
-          client_code: client.client_code,
-          email: client.email,
-          phone: client.phone,
-          business_name: client.business_name,
-          address: client.address,
-        },
-        transactionsKES,
-        transactionsUSD,
-        summaryKES,
-        summaryUSD,
-        reportType: "full",
-      });
+      const isMobileBrowser =
+        typeof navigator !== "undefined" &&
+        /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+
+      const shareSupported =
+        isMobileBrowser &&
+        typeof navigator !== "undefined" &&
+        "share" in navigator &&
+        typeof (navigator as any).share === "function" &&
+        "canShare" in navigator;
+
+      if (shareSupported) {
+        // Use Web Share API with a real PDF file when available
+        generateClientPDFReport(
+          {
+            client: {
+              client_name: client.client_name,
+              client_code: client.client_code,
+              email: client.email,
+              phone: client.phone,
+              business_name: client.business_name,
+              address: client.address,
+            },
+            transactionsKES,
+            transactionsUSD,
+            summaryKES,
+            summaryUSD,
+            reportType: "full",
+          },
+          async (doc, fileName) => {
+            try {
+              const blob = doc.output("blob");
+              const file = new File([blob], fileName, {
+                type: "application/pdf",
+              });
+
+              const nav = navigator as any;
+              if (nav.canShare && nav.canShare({ files: [file] })) {
+                await nav.share({
+                  files: [file],
+                  title: "Account Statement",
+                  text: `${client.client_name} • ${client.client_code}`,
+                });
+              } else {
+                // Fallback to normal download if file sharing isn't allowed
+                doc.save(fileName);
+              }
+            } catch (shareError) {
+              console.error("Error sharing PDF:", shareError);
+              toast.error("Failed to share statement. Downloading instead.");
+              doc.save(fileName);
+            }
+          },
+        );
+      } else {
+        // Desktop or unsupported browsers: standard browser download behaviour
+        generateClientPDFReport({
+          client: {
+            client_name: client.client_name,
+            client_code: client.client_code,
+            email: client.email,
+            phone: client.phone,
+            business_name: client.business_name,
+            address: client.address,
+          },
+          transactionsKES,
+          transactionsUSD,
+          summaryKES,
+          summaryUSD,
+          reportType: "full",
+        });
+      }
     } catch (error) {
       console.error("Error generating PDF:", error);
       toast.error(
