@@ -735,13 +735,25 @@ export const generateCombinedClientsPDFReport = (
   const allKES: Transaction[] = [];
   const allUSD: Transaction[] = [];
 
-  clients.forEach(({ transactionsKES, transactionsUSD }) => {
+  clients.forEach(({ client, transactionsKES, transactionsUSD }) => {
     transactionsKES.forEach((t) => {
-      allKES.push({ ...t });
+      const baseDescription = t.description || "";
+      allKES.push({
+        ...t,
+        description: baseDescription
+          ? `${client.client_name} - ${baseDescription}`
+          : client.client_name,
+      });
     });
 
     transactionsUSD.forEach((t) => {
-      allUSD.push({ ...t });
+      const baseDescription = t.description || "";
+      allUSD.push({
+        ...t,
+        description: baseDescription
+          ? `${client.client_name} - ${baseDescription}`
+          : client.client_name,
+      });
     });
   });
 
