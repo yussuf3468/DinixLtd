@@ -365,8 +365,52 @@ export default function Reports() {
         toast.info("No transactions found for the selected clients.");
         return;
       }
+      const isMobileBrowser =
+        typeof navigator !== "undefined" &&
+        /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
 
-      generateCombinedClientsPDFReport({ clients: clientsPayload });
+      const shareSupported =
+        isMobileBrowser &&
+        typeof navigator !== "undefined" &&
+        "share" in navigator &&
+        typeof (navigator as any).share === "function" &&
+        "canShare" in navigator;
+
+      if (shareSupported) {
+        // Use Web Share API with a real PDF file for combined statements
+        generateCombinedClientsPDFReport(
+          { clients: clientsPayload },
+          async (doc, fileName) => {
+            try {
+              const blob = doc.output("blob");
+              const file = new File([blob], fileName, {
+                type: "application/pdf",
+              });
+
+              const nav = navigator as any;
+              if (nav.canShare && nav.canShare({ files: [file] })) {
+                await nav.share({
+                  files: [file],
+                  title: "Combined Account Statement",
+                  text: `${clientsPayload.length} client${clientsPayload.length > 1 ? "s" : ""} • Dinix General Trading`,
+                });
+              } else {
+                doc.save(fileName);
+              }
+            } catch (shareError) {
+              console.error("Error sharing combined PDF:", shareError);
+              toast.error(
+                "Failed to share combined statement. Downloading instead.",
+              );
+              doc.save(fileName);
+            }
+          },
+        );
+      } else {
+        // Desktop or unsupported browsers: standard browser download behaviour
+        generateCombinedClientsPDFReport({ clients: clientsPayload });
+      }
+
       toast.success(
         `Combined statement generated for ${clientsPayload.length} client${clientsPayload.length > 1 ? "s" : ""}.`,
       );
