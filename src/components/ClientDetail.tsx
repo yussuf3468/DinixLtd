@@ -254,6 +254,9 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
     transactionId: string,
     currency: "kes" | "usd",
   ) => {
+    if (submitting) return;
+    setSubmitting(true);
+
     try {
       const table =
         currency === "kes"
@@ -288,13 +291,16 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
     } catch (error) {
       console.error("Unexpected error:", error);
       toast.error("An unexpected error occurred.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleEditTransaction = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!editingTransaction) return;
+    if (!editingTransaction || submitting) return;
 
+    setSubmitting(true);
     const formData = new FormData(e.currentTarget);
     const transactionType = formData.get("transaction_type") as string;
     const amount = Number(formData.get("amount"));
@@ -327,8 +333,25 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
         return;
       }
 
-      // Reload data to reflect changes
-      await loadClientData();
+      // Build updated transaction locally and refresh state without full reload
+      const mergedTransaction = {
+        ...editingTransaction,
+        ...transactionData,
+      } as any;
+
+      if (activeTab === "kes") {
+        const updatedTransactions = transactionsKES.map((t) =>
+          t.id === editingTransaction.id ? mergedTransaction : t,
+        );
+        setTransactionsKES(updatedTransactions);
+        calculateSummary(updatedTransactions, setSummaryKES);
+      } else {
+        const updatedTransactions = transactionsUSD.map((t) =>
+          t.id === editingTransaction.id ? mergedTransaction : t,
+        );
+        setTransactionsUSD(updatedTransactions);
+        calculateSummary(updatedTransactions, setSummaryUSD);
+      }
 
       setShowEditTransaction(false);
       setEditingTransaction(null);
@@ -336,6 +359,8 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
     } catch (error) {
       console.error("Unexpected error:", error);
       toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -1509,15 +1534,17 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
                       setShowEditTransaction(false);
                       setEditingTransaction(null);
                     }}
-                    className="flex-1 px-6 py-3 sm:py-3.5 bg-gray-100 border-2 border-gray-200 rounded-xl sm:rounded-2xl text-gray-700 font-bold hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 text-sm sm:text-base active:scale-95"
+                    disabled={submitting}
+                    className="flex-1 px-6 py-3 sm:py-3.5 bg-gray-100 border-2 border-gray-200 rounded-xl sm:rounded-2xl text-gray-700 font-bold hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 text-sm sm:text-base active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-6 py-3 sm:py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 text-white rounded-xl sm:rounded-2xl font-black hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 text-sm sm:text-base active:scale-95"
+                    disabled={submitting}
+                    className="flex-1 px-6 py-3 sm:py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 text-white rounded-xl sm:rounded-2xl font-black hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 text-sm sm:text-base active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    ✓ Update Transaction
+                    {submitting ? "Updating..." : "✓ Update Transaction"}
                   </button>
                 </div>
               </form>
