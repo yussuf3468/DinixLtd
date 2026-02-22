@@ -48,14 +48,14 @@ export const generateClientPDFReport = (
       reportType,
     } = options;
 
-    // Landscape A4 for maximum column space
+    // Portrait A4 — prints correctly on any printer without rotation
     const doc = new jsPDF({
-      orientation: "landscape",
+      orientation: "portrait",
       unit: "mm",
       format: "a4",
     });
-    const pageWidth = doc.internal.pageSize.getWidth(); // 297
-    const pageHeight = doc.internal.pageSize.getHeight(); // 210
+    const pageWidth = doc.internal.pageSize.getWidth(); // 210
+    const pageHeight = doc.internal.pageSize.getHeight(); // 297
     const ML = 10; // left margin
     const MR = 10; // right margin
 
@@ -71,40 +71,43 @@ export const generateClientPDFReport = (
 
     // ─── HEADER BAND ────────────────────────────────────────────────────────
     doc.setFillColor(16, 185, 129);
-    doc.rect(0, 0, pageWidth, 22, "F");
+    doc.rect(0, 0, pageWidth, 26, "F");
 
-    // Company name — left
-    doc.setFontSize(16);
+    // Company name — top left
+    doc.setFontSize(15);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 255, 255);
     doc.text("DINIX GENERAL TRADING", ML, 10);
 
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(220, 255, 240);
-    doc.text("ACCOUNT STATEMENT", ML, 18);
+    doc.text("ACCOUNT STATEMENT", ML, 16);
 
-    // Client info — right side of header
+    // Statement date below subtitle
     const stmtDate = new Date().toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     });
+    doc.setFontSize(8);
+    doc.setTextColor(180, 255, 220);
+    doc.text(`Date: ${stmtDate}`, ML, 22);
+
+    // Client info — right side of header
     doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 255, 255);
-    doc.text(client.client_name, pageWidth - MR, 9, { align: "right" });
+    doc.text(client.client_name, pageWidth - MR, 10, { align: "right" });
     doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
     doc.setTextColor(220, 255, 240);
-    doc.text(`Account: ${client.client_code}`, pageWidth - MR, 15, {
-      align: "right",
-    });
+    doc.text(`Account: ${client.client_code}`, pageWidth - MR, 16, { align: "right" });
     if (client.phone) {
-      doc.text(`Tel: ${client.phone}`, pageWidth - MR, 21, { align: "right" });
+      doc.text(`Tel: ${client.phone}`, pageWidth - MR, 22, { align: "right" });
     }
-    doc.text(`Date: ${stmtDate}`, ML + 70, 18);
 
-    let yPosition = 27;
+    let yPosition = 31;
 
     // ─── HELPERS ────────────────────────────────────────────────────────────
 
@@ -166,8 +169,8 @@ export const generateClientPDFReport = (
         footBal,
       ];
 
-      // Fixed column widths that fill tableW (277mm exactly):
-      // date=30, desc=80, in=52, out=52, bal=63
+      // Portrait A4 table width = 190mm (210 - 10 - 10)
+      // date=26, desc=62, in=34, out=34, bal=34  → total=190
       autoTable(doc, {
         startY: yPosition,
         head: [["Date", "Description", "Money IN", "Money OUT", "Balance"]],
@@ -179,8 +182,8 @@ export const generateClientPDFReport = (
           fillColor: headColor,
           textColor: [255, 255, 255],
           fontStyle: "bold",
-          fontSize: 10,
-          cellPadding: 2.5,
+          fontSize: 9,
+          cellPadding: 2.2,
           lineColor: BORDER,
           lineWidth: 0.2,
         },
@@ -188,36 +191,36 @@ export const generateClientPDFReport = (
           fillColor: FOOT_BG,
           textColor: [30, 30, 30],
           fontStyle: "bold",
-          fontSize: 10,
-          cellPadding: 2.5,
+          fontSize: 9,
+          cellPadding: 2.2,
           lineColor: BORDER,
           lineWidth: 0.3,
         },
         styles: {
-          fontSize: 9,
-          cellPadding: 2.5,
+          fontSize: 8.5,
+          cellPadding: 2,
           lineColor: BORDER,
           lineWidth: 0.2,
           textColor: [30, 30, 30],
           overflow: "linebreak",
         },
         columnStyles: {
-          0: { cellWidth: 30, fontStyle: "bold" },
-          1: { cellWidth: 80 },
+          0: { cellWidth: 26, fontStyle: "bold" },
+          1: { cellWidth: 62 },
           2: {
-            cellWidth: 52,
+            cellWidth: 34,
             halign: "right",
             textColor: [5, 150, 105],
             fontStyle: "bold",
           },
           3: {
-            cellWidth: 52,
+            cellWidth: 34,
             halign: "right",
             textColor: [220, 38, 38],
             fontStyle: "bold",
           },
           4: {
-            cellWidth: 63,
+            cellWidth: 34,
             halign: "right",
             fontStyle: "bold",
             textColor: summary.balance >= 0 ? [6, 90, 172] : [200, 30, 30],
