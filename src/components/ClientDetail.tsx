@@ -323,10 +323,12 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
           ? "client_transactions_kes"
           : "client_transactions_usd";
 
-      const { error: updateError } = await supabase
+      const { data: updatedRows, error: updateError } = await supabase
         .from(table)
         .update(transactionData)
-        .eq("id", editingTransaction.id);
+        .eq("id", editingTransaction.id)
+        .eq("user_id", user!.id)
+        .select();
 
       if (updateError) {
         console.error("Error updating transaction:", updateError);
@@ -334,28 +336,23 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
         return;
       }
 
-      // Build updated transaction locally and refresh state without full reload
-      const mergedTransaction = {
-        ...editingTransaction,
-        ...transactionData,
-      } as any;
-
-      if (activeTab === "kes") {
-        const updatedTransactions = transactionsKES.map((t) =>
-          t.id === editingTransaction.id ? mergedTransaction : t,
+      // Supabase returns an empty array (no error) when RLS silently blocks
+      if (!updatedRows || updatedRows.length === 0) {
+        console.error(
+          "Update returned 0 rows — likely no UPDATE policy on Supabase. Run migration 007 in Supabase SQL Editor.",
         );
-        setTransactionsKES(updatedTransactions);
-        calculateSummary(updatedTransactions, setSummaryKES);
-      } else {
-        const updatedTransactions = transactionsUSD.map((t) =>
-          t.id === editingTransaction.id ? mergedTransaction : t,
+        toast.error(
+          "Update blocked by database policy. Please contact support or check Supabase RLS settings.",
         );
-        setTransactionsUSD(updatedTransactions);
-        calculateSummary(updatedTransactions, setSummaryUSD);
+        return;
       }
 
       setShowEditTransaction(false);
       setEditingTransaction(null);
+
+      // Reload from DB so UI always reflects the true persisted state
+      await loadClientData();
+
       toast.success("Transaction updated successfully!");
     } catch (error) {
       console.error("Unexpected error:", error);
