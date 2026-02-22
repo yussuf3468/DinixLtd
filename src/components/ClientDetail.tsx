@@ -57,6 +57,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<"kes" | "usd">("kes");
+  const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
   const [showAddTransaction, setShowAddTransaction] = useState(false);
   const [showEditTransaction, setShowEditTransaction] = useState(false);
   const [editingTransaction, setEditingTransaction] =
@@ -516,8 +517,11 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
     }
   };
 
-  const generatePDFReport = async () => {
+  const generatePDFReport = async (
+    reportType: "full" | "kes-only" | "usd-only" = "full",
+  ) => {
     if (!client) return;
+    setShowCurrencyPicker(false);
 
     try {
       const isMobileBrowser =
@@ -547,7 +551,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
             transactionsUSD,
             summaryKES,
             summaryUSD,
-            reportType: "full",
+            reportType,
           },
           async (doc, fileName) => {
             try {
@@ -589,7 +593,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
           transactionsUSD,
           summaryKES,
           summaryUSD,
-          reportType: "full",
+          reportType,
         });
       }
     } catch (error) {
@@ -675,12 +679,82 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
               </div>
             </div>
             <button
-              onClick={generatePDFReport}
+              onClick={() => setShowCurrencyPicker(true)}
               className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-xl hover:shadow-md hover:shadow-blue-500/40 transition-all duration-300 font-semibold text-xs sm:text-sm active:scale-95 border border-blue-500 mt-3 sm:mt-0"
             >
               <Download className="w-5 h-5 transition-transform group-hover:translate-y-0.5" />
               <span className="tracking-wide">Download Statement</span>
             </button>
+
+            {/* ── Currency picker modal ── */}
+            {showCurrencyPicker && (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+                onClick={() => setShowCurrencyPicker(false)}
+              >
+                <div
+                  className="bg-white rounded-2xl shadow-2xl w-full max-w-xs p-6"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h3 className="text-base font-bold text-gray-900 mb-1">
+                    Download Statement
+                  </h3>
+                  <p className="text-xs text-gray-500 mb-5">
+                    Choose which currency to include:
+                  </p>
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={() => generatePDFReport("full")}
+                      className="flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors text-left"
+                    >
+                      {/* <span className="text-lg">🌍</span> */}
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">
+                          Both (KSH + USD)
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Full statement all currencies
+                        </p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => generatePDFReport("kes-only")}
+                      className="flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-green-50 border border-green-200 hover:bg-green-100 transition-colors text-left"
+                    >
+                      <span className="text-lg">🇰🇪</span>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">
+                          KSH Only
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Kenyan Shillings transactions
+                        </p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => generatePDFReport("usd-only")}
+                      className="flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-colors text-left"
+                    >
+                      <span className="text-lg">🇺🇸</span>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">
+                          USD Only
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          US Dollar transactions
+                        </p>
+                      </div>
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setShowCurrencyPicker(false)}
+                    className="mt-4 w-full py-2 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
