@@ -58,7 +58,6 @@ export const generateClientPDFReport = (
     const pageHeight = doc.internal.pageSize.getHeight(); // 210
     const ML = 10; // left margin
     const MR = 10; // right margin
-    const tableW = pageWidth - ML - MR;
 
     // Decide which sections to show — skip any currency with no transactions
     const showKES =
@@ -72,18 +71,18 @@ export const generateClientPDFReport = (
 
     // ─── HEADER BAND ────────────────────────────────────────────────────────
     doc.setFillColor(16, 185, 129);
-    doc.rect(0, 0, pageWidth, 18, "F");
+    doc.rect(0, 0, pageWidth, 22, "F");
 
     // Company name — left
-    doc.setFontSize(13);
+    doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 255, 255);
-    doc.text("DINIX GENERAL TRADING", ML, 8);
+    doc.text("DINIX GENERAL TRADING", ML, 10);
 
-    doc.setFontSize(8);
+    doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(220, 255, 240);
-    doc.text("ACCOUNT STATEMENT", ML, 14);
+    doc.text("ACCOUNT STATEMENT", ML, 18);
 
     // Client info — right side of header
     const stmtDate = new Date().toLocaleDateString("en-GB", {
@@ -91,21 +90,21 @@ export const generateClientPDFReport = (
       month: "short",
       year: "numeric",
     });
-    doc.setFontSize(8);
+    doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 255, 255);
-    doc.text(client.client_name, pageWidth - MR, 7, { align: "right" });
+    doc.text(client.client_name, pageWidth - MR, 9, { align: "right" });
     doc.setFont("helvetica", "normal");
     doc.setTextColor(220, 255, 240);
-    doc.text(`Account: ${client.client_code}`, pageWidth - MR, 12, {
+    doc.text(`Account: ${client.client_code}`, pageWidth - MR, 15, {
       align: "right",
     });
     if (client.phone) {
-      doc.text(`Tel: ${client.phone}`, pageWidth - MR, 17, { align: "right" });
+      doc.text(`Tel: ${client.phone}`, pageWidth - MR, 21, { align: "right" });
     }
-    doc.text(`Date: ${stmtDate}`, ML + 60, 14);
+    doc.text(`Date: ${stmtDate}`, ML + 70, 18);
 
-    let yPosition = 22;
+    let yPosition = 27;
 
     // ─── HELPERS ────────────────────────────────────────────────────────────
 
@@ -149,11 +148,11 @@ export const generateClientPDFReport = (
       headColor: [number, number, number],
     ) {
       // Section label
-      doc.setFontSize(8);
+      doc.setFontSize(10);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(headColor[0], headColor[1], headColor[2]);
       doc.text(label, ML, yPosition);
-      yPosition += 3;
+      yPosition += 4;
 
       const rows = buildTableData(txns, sym);
       const footBal =
@@ -167,10 +166,8 @@ export const generateClientPDFReport = (
         footBal,
       ];
 
-      // Column widths: date=28, desc=auto, in=35, out=35, bal=38
-      const fixedW = 28 + 35 + 35 + 38;
-      const descW = tableW - fixedW;
-
+      // Fixed column widths that fill tableW (277mm exactly):
+      // date=30, desc=80, in=52, out=52, bal=63
       autoTable(doc, {
         startY: yPosition,
         head: [["Date", "Description", "Money IN", "Money OUT", "Balance"]],
@@ -182,8 +179,8 @@ export const generateClientPDFReport = (
           fillColor: headColor,
           textColor: [255, 255, 255],
           fontStyle: "bold",
-          fontSize: 7.5,
-          cellPadding: 1.8,
+          fontSize: 10,
+          cellPadding: 2.5,
           lineColor: BORDER,
           lineWidth: 0.2,
         },
@@ -191,36 +188,36 @@ export const generateClientPDFReport = (
           fillColor: FOOT_BG,
           textColor: [30, 30, 30],
           fontStyle: "bold",
-          fontSize: 8,
-          cellPadding: 2,
+          fontSize: 10,
+          cellPadding: 2.5,
           lineColor: BORDER,
           lineWidth: 0.3,
         },
         styles: {
-          fontSize: 7,
-          cellPadding: 1.5,
+          fontSize: 9,
+          cellPadding: 2.5,
           lineColor: BORDER,
           lineWidth: 0.2,
           textColor: [30, 30, 30],
           overflow: "linebreak",
         },
         columnStyles: {
-          0: { cellWidth: 28, fontStyle: "bold" },
-          1: { cellWidth: descW },
+          0: { cellWidth: 30, fontStyle: "bold" },
+          1: { cellWidth: 80 },
           2: {
-            cellWidth: 35,
+            cellWidth: 52,
             halign: "right",
             textColor: [5, 150, 105],
             fontStyle: "bold",
           },
           3: {
-            cellWidth: 35,
+            cellWidth: 52,
             halign: "right",
             textColor: [220, 38, 38],
             fontStyle: "bold",
           },
           4: {
-            cellWidth: 38,
+            cellWidth: 63,
             halign: "right",
             fontStyle: "bold",
             textColor: summary.balance >= 0 ? [6, 90, 172] : [200, 30, 30],
@@ -232,7 +229,7 @@ export const generateClientPDFReport = (
         rowPageBreak: "avoid",
       });
 
-      yPosition = (doc as any).lastAutoTable.finalY + 5;
+      yPosition = (doc as any).lastAutoTable.finalY + 6;
     }
 
     // ─── RENDER SECTIONS ────────────────────────────────────────────────────
@@ -268,7 +265,7 @@ export const generateClientPDFReport = (
       doc.setDrawColor(...BORDER);
       doc.setLineWidth(0.3);
       doc.line(ML, pageHeight - 8, pageWidth - MR, pageHeight - 8);
-      doc.setFontSize(7);
+      doc.setFontSize(8.5);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(120, 120, 120);
       doc.text("Dinix General Trading — Confidential", ML, pageHeight - 4);
