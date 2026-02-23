@@ -102,7 +102,9 @@ export const generateClientPDFReport = (
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(220, 255, 240);
-    doc.text(`Account: ${client.client_code}`, pageWidth - MR, 16, { align: "right" });
+    doc.text(`Account: ${client.client_code}`, pageWidth - MR, 16, {
+      align: "right",
+    });
     if (client.phone) {
       doc.text(`Tel: ${client.phone}`, pageWidth - MR, 22, { align: "right" });
     }
@@ -232,7 +234,21 @@ export const generateClientPDFReport = (
         rowPageBreak: "avoid",
       });
 
-      yPosition = (doc as any).lastAutoTable.finalY + 6;
+      yPosition = (doc as any).lastAutoTable.finalY + 4;
+
+      // ── MG / Mileage count ──────────────────────────────────────────────
+      const mgCount = txns.filter((t) =>
+        /\bmg\b/i.test(t.description || ""),
+      ).length;
+      doc.setFontSize(8.5);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(headColor[0], headColor[1], headColor[2]);
+      doc.text(
+        `Mileage (MG) Count: ${mgCount} trip${mgCount !== 1 ? "s" : ""}`,
+        ML,
+        yPosition,
+      );
+      yPosition += 7;
     }
 
     // ─── RENDER SECTIONS ────────────────────────────────────────────────────

@@ -128,6 +128,13 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
     [activeTab],
   );
 
+  // Count how many transactions have "mg" in their description (mileage entries)
+  const mgCount = useMemo(
+    () =>
+      currentTransactions.filter((t) => /\bmg\b/i.test(t.description)).length,
+    [currentTransactions],
+  );
+
   const loadClientData = async () => {
     if (!user || !clientId) return;
 
@@ -804,7 +811,7 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
 
         {/* Financial Summary */}
         <div className="mb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {/* Balance Card (Outstanding/Credit) FIRST */}
             <div
               className={`rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-300 border ${
@@ -873,6 +880,25 @@ export default function ClientDetail({ clientId, onBack }: ClientDetailProps) {
               </p>
               <p className="text-2xl sm:text-3xl font-bold tracking-tight">
                 {formatCurrency(currentSummary.receivable, currencySymbol)}
+              </p>
+            </div>
+
+            {/* MG / Mileage Count Card */}
+            <div className="bg-amber-50 rounded-2xl p-4 sm:p-5 text-amber-800 shadow-sm hover:shadow-md transition-all duration-300 border border-amber-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[0.68rem] sm:text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-semibold uppercase tracking-wide border border-amber-200">
+                  MILEAGE
+                </span>
+                <span className="text-lg">🚛</span>
+              </div>
+              <p className="text-xs sm:text-sm text-amber-700 mb-1 font-semibold">
+                MG Count
+              </p>
+              <p className="text-2xl sm:text-3xl font-bold tracking-tight">
+                {mgCount}
+                <span className="text-sm font-semibold ml-1 opacity-70">
+                  trips
+                </span>
               </p>
             </div>
           </div>
