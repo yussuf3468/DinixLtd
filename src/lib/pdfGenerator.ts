@@ -171,25 +171,13 @@ export const generateClientPDFReport = (
         footBal,
       ];
 
-      // MG / Mileage count — calculated before the table so it can go in the footer
-      const mgCount = txns.filter((t) =>
-        /\bmg\b/i.test(t.description || ""),
-      ).length;
-      const mgRow = [
-        "",
-        `Mileage (MG) Count: ${mgCount} trip${mgCount !== 1 ? "s" : ""}`,
-        "",
-        "",
-        "",
-      ];
-
       // Portrait A4 table width = 190mm (210 - 10 - 10)
       // date=26, desc=62, in=34, out=34, bal=34  → total=190
       autoTable(doc, {
         startY: yPosition,
         head: [["Date", "Description", "Money IN", "Money OUT", "Balance"]],
         body: rows,
-        foot: [footRow, mgRow],
+        foot: [footRow],
         showFoot: "lastPage",
         theme: "grid",
         headStyles: {
