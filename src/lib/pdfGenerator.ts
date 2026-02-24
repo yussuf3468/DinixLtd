@@ -56,8 +56,8 @@ export const generateClientPDFReport = (
     });
     const pageWidth = doc.internal.pageSize.getWidth(); // 210
     const pageHeight = doc.internal.pageSize.getHeight(); // 297
-    const ML = 12; // left margin (12mm = safe printer zone)
-    const MR = 12; // right margin (12mm = safe printer zone)
+    const ML = 10; // left margin
+    const MR = 10; // right margin
 
     // Decide which sections to show — skip any currency with no transactions
     const showKES =
@@ -171,8 +171,8 @@ export const generateClientPDFReport = (
         footBal,
       ];
 
-      // Portrait A4 table width = 186mm (210 - 12 - 12)
-      // date=26, desc=60, in=33, out=33, bal=34  → total=186
+      // Portrait A4 table width = 190mm (210 - 10 - 10)
+      // date=24, desc=60, in=34, out=34, bal=38  → total=190
       autoTable(doc, {
         startY: yPosition,
         head: [["Date", "Description", "Money IN", "Money OUT", "Balance"]],
@@ -207,22 +207,22 @@ export const generateClientPDFReport = (
           overflow: "linebreak",
         },
         columnStyles: {
-          0: { cellWidth: 26, fontStyle: "bold" },
+          0: { cellWidth: 24, fontStyle: "bold" },
           1: { cellWidth: 60 },
           2: {
-            cellWidth: 33,
+            cellWidth: 34,
             halign: "right",
             textColor: [5, 150, 105],
             fontStyle: "bold",
           },
           3: {
-            cellWidth: 33,
+            cellWidth: 34,
             halign: "right",
             textColor: [220, 38, 38],
             fontStyle: "bold",
           },
           4: {
-            cellWidth: 34,
+            cellWidth: 38,
             halign: "right",
             fontStyle: "bold",
             textColor: summary.balance >= 0 ? [6, 90, 172] : [200, 30, 30],
